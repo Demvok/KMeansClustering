@@ -28,10 +28,10 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea3 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend3 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series5 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Series series6 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.cbMethod = new System.Windows.Forms.ComboBox();
             this.chart = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.label3 = new System.Windows.Forms.Label();
@@ -49,35 +49,35 @@
             "1",
             "2"});
             this.cbMethod.Location = new System.Drawing.Point(12, 89);
-            this.cbMethod.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.cbMethod.Margin = new System.Windows.Forms.Padding(4);
             this.cbMethod.Name = "cbMethod";
             this.cbMethod.Size = new System.Drawing.Size(244, 23);
             this.cbMethod.TabIndex = 0;
             // 
             // chart
             // 
-            chartArea3.AxisX.Title = "PetalLength";
-            chartArea3.AxisY.Title = "PetalWidth";
-            chartArea3.Name = "ChartArea";
-            this.chart.ChartAreas.Add(chartArea3);
-            legend3.Enabled = false;
-            legend3.Name = "Legend1";
-            this.chart.Legends.Add(legend3);
+            chartArea1.AxisX.Title = "PetalLength";
+            chartArea1.AxisY.Title = "PetalWidth";
+            chartArea1.Name = "ChartArea";
+            this.chart.ChartAreas.Add(chartArea1);
+            legend1.Enabled = false;
+            legend1.Name = "Legend1";
+            this.chart.Legends.Add(legend1);
             this.chart.Location = new System.Drawing.Point(264, 6);
-            this.chart.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.chart.Margin = new System.Windows.Forms.Padding(4);
             this.chart.Name = "chart";
-            series5.ChartArea = "ChartArea";
-            series5.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Point;
-            series5.Legend = "Legend1";
-            series5.Name = "Data";
-            series6.ChartArea = "ChartArea";
-            series6.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Point;
-            series6.Legend = "Legend1";
-            series6.MarkerColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
-            series6.MarkerSize = 8;
-            series6.Name = "Centroids";
-            this.chart.Series.Add(series5);
-            this.chart.Series.Add(series6);
+            series1.ChartArea = "ChartArea";
+            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Point;
+            series1.Legend = "Legend1";
+            series1.Name = "Data";
+            series2.ChartArea = "ChartArea";
+            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Point;
+            series2.Legend = "Legend1";
+            series2.MarkerColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+            series2.MarkerSize = 8;
+            series2.Name = "Centroids";
+            this.chart.Series.Add(series1);
+            this.chart.Series.Add(series2);
             this.chart.Size = new System.Drawing.Size(700, 582);
             this.chart.TabIndex = 1;
             this.chart.Text = "chart1";
@@ -134,6 +134,7 @@
             this.btnSolve.TabIndex = 6;
             this.btnSolve.Text = "Кластеризувати";
             this.btnSolve.UseVisualStyleBackColor = true;
+            this.btnSolve.Click += new System.EventHandler(this.btnSolve_Click);
             // 
             // fMain
             // 
@@ -148,8 +149,9 @@
             this.Controls.Add(this.chart);
             this.Controls.Add(this.cbMethod);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.75F);
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "fMain";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Main";
             ((System.ComponentModel.ISupportInitialize)(this.chart)).EndInit();
             this.ResumeLayout(false);
