@@ -62,8 +62,6 @@ namespace KMeansClustering
                 cbYAxis.Items.Add(label);
             }
 
-            Point.N = numericalColumns.Count;
-
             if (numericalColumns.Count == 0) return;
             cbXAxis.SelectedIndex = 0;
             if (numericalColumns.Count > 1)
@@ -129,9 +127,56 @@ namespace KMeansClustering
 
         private void btnSolve_Click(object sender, EventArgs e)
         {
+            if (data == null) return;
+
+            DataTable cleanedData = data.Clone();
+            foreach (DataRow row in data.Rows)
+            {
+                cleanedData.ImportRow(row);
+            }
+
+            List<string> toDelete = new List<string>();
+            foreach (DataColumn column in cleanedData.Columns)
+            {
+                bool isNum = false;
+                foreach (string label in numericalColumns)
+                {
+                    if (label == column.ColumnName) isNum = true;
+                }
+
+                if (!isNum) toDelete.Add(column.ColumnName);
+            }
+
+            foreach (string item in toDelete)
+            {
+                cleanedData.Columns.Remove(item);
+            }
+
             switch (cbMethod.SelectedIndex)
             {
                 case 0:
+                    KMeansCluster cluster;
+                    try
+                    {
+                        cluster = new KMeansCluster(cleanedData, C);
+                    }
+                    catch (Exception ex)
+                    {
+                        tbOut.Text = ex.Message;
+                        return;
+                    }
+                    
+
+                    tbOut.Text = "";
+                    foreach (DataRow dot in cluster.centroids.Rows)
+                    {
+                        string res = "";
+                        foreach (var cell in dot.ItemArray)
+                        {
+                            res += cell.ToString() + " | ";
+                        }
+                        tbOut.Text += res + "\r\n";
+                    }
                     break;
                 case 1:
                     break;

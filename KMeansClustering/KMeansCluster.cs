@@ -12,22 +12,27 @@ namespace KMeansClustering
 
         public DataTable data;
         public int C;
-        public DataTable centroids = new DataTable();
+        public DataTable centroids;
 
         public KMeansCluster(DataTable _data, int _C=2)
         {
-            if (data == null) throw new ArgumentNullException("Data missing");
+            if (_data == null) throw new ArgumentNullException("Data missing");
             data = _data;
             C = _C;
+            centroids = _data.Clone();
 
+            Random rnd = new Random();
             for (int i = 0; i < C; i++)
-            {
-                Random rnd = new Random();
+            {                
                 int index = rnd.Next(0, data.Rows.Count + 1);
 
                 object[] values = data.Rows[index].ItemArray;
-                centroids.Rows.Add(values);
+
+                DataRow newRow = centroids.NewRow();
+                newRow.ItemArray = values;
+                centroids.Rows.Add(newRow);
             }
+
         }
 
     }
