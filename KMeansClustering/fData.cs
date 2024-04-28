@@ -13,13 +13,12 @@ namespace KMeansClustering
 {
     public partial class fData : Form
     {
-        DataTable data;
+        public DataTable data;
 
         string defaultFileLocation = System.Reflection.Assembly.GetEntryAssembly().Location;
 
         int N = 1;
         int M = 1;
-
 
         public fData(DataTable _data)
         {
@@ -28,13 +27,15 @@ namespace KMeansClustering
             if (_data == null)
             {
                 data = new DataTable();
-                _data = data;
             }
             else
             {
                 data = _data;
+                tbM.Text = data.Rows.Count.ToString();
+                tbN.Text = data.Columns.Count.ToString();
             }
 
+            dataGridView.DataSource = data;
             defaultFileLocation = defaultFileLocation.Substring(0, defaultFileLocation.Length - 48) + "\\Data\\Iris.csv";
             tbFileName.Text = defaultFileLocation;
         }
@@ -80,7 +81,7 @@ namespace KMeansClustering
 
         private void btnCreateTable_Click(object sender, EventArgs e)
         {
-            if (data != null)
+            if (dataGridView.Rows.Count != 0)
             {
                 DialogResult res = MessageBox.Show("Таблиця не пуста, ця дія створить нову, а всі дані буде втрачено. Продовжити?", "Видалення вмісту", MessageBoxButtons.OKCancel);
                 if (res == DialogResult.Cancel) return;
@@ -127,11 +128,11 @@ namespace KMeansClustering
 
         private void fData_FormClosed(object sender, FormClosedEventArgs e)
         {
+            if (data.Rows.Count == 0) return;
             for (int row = 0; row < M; row++)
             {
                 for (int column = 0; column < N; column++)
                 {
-                    //if (dataGridView.Rows[row].Cells[column].Value == null) throw new Exception("Empty cell");
                     data.Rows[row][column] = dataGridView.Rows[row].Cells[column].Value;
                 }
             }
