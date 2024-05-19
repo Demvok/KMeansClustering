@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -13,28 +14,31 @@ namespace KMeansClustering
 {
     public partial class fMain : Form
     {
+         readonly Color[] possibleColors = { Color.Blue, Color.Green, Color.Orange, Color.Purple, Color.Yellow, Color.Cyan,
+            Color.Magenta, Color.Brown, Color.DarkBlue, Color.DarkGreen, Color.DarkOrange, Color.DarkCyan,
+            Color.DarkMagenta};
+
         DataTable data;
         int C;
+
+        Color[] palette;
         string[] columnLabels;
         List<string> numericalColumns = new List<string>();
 
         Point[] centroids;
-        Color[] palette;        
+        List<Point>[] clusters;        
 
         public fMain()
         {
             InitializeComponent();
             cbMethod.SelectedIndex = 0;
             C = int.Parse(tbC.Text);
-            centroids = new Point[C];
-            palette = new Color[C];
+            
+            palette = new Color[possibleColors.Length - 1];
             for (int i = 0; i < C; i++)
-            {
-                centroids[i] = new Point(new List<double>());
-                Random rnd = new Random();
-                palette[i] = Color.FromArgb(1, rnd.Next(0, 255), rnd.Next(0, 255), rnd.Next(0, 255));
-            }
-                        
+            {                
+                palette[i] = possibleColors[i];
+            }                       
         }
 
         private void btnSetData_Click(object sender, EventArgs e)
@@ -107,13 +111,19 @@ namespace KMeansClustering
                 {
                     double x = Convert.ToDouble(data.Rows[i].Field<string>(cbXAxis.Text), System.Globalization.CultureInfo.InvariantCulture);
                     double y = Convert.ToDouble(data.Rows[i].Field<string>(cbYAxis.Text), System.Globalization.CultureInfo.InvariantCulture);
-                    chart.Series[0].Points.AddXY(x, y);
+                    DataPoint point = new DataPoint(x, y);
+
+                    if (clusters != null)
+                    {
+                        int pointClass = findClass(x, y);
+                        point.Color = palette[pointClass];
+                    }
+                    chart.Series[0].Points.Add(point);
                 }
 
+                if (centroids == null) return;
                 for (int i = 0; i < centroids.Length; i++)
-                {
-                    if (centroids[i].coords.Count == 0) continue;
-                                       
+                {                                       
                     double x = centroids[i].coords[numericalColumns.IndexOf(cbXAxis.Text)];
                     double y = centroids[i].coords[numericalColumns.IndexOf(cbYAxis.Text)];
                     chart.Series[1].Points.AddXY(x, y);                    
@@ -127,6 +137,40 @@ namespace KMeansClustering
             }            
         }
 
+        private int findClass(double x, double y)
+        {
+            int pointClass = 0;
+            for (int j = 0; j < clusters.Length; j++)
+            {
+                bool isInCluster = false;
+                for (int n = 0; n < clusters[j].Count; n++)
+                {
+                    if (clusters[j][n].coords[numericalColumns.IndexOf(cbXAxis.Text)] == x &&
+                        clusters[j][n].coords[numericalColumns.IndexOf(cbYAxis.Text)] == y)
+                    {
+                        isInCluster = true;
+                        break;
+                    }
+                }
+                if (isInCluster)
+                {
+                    pointClass = j;
+                    break;
+                }
+            }
+            return pointClass;
+        }
+
+        private double GetExecutionTime(Action action)
+        {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+            action();
+
+            stopwatch.Stop();
+            return stopwatch.ElapsedMilliseconds;
+        }
 
         private void tbC_TextChanged(object sender, EventArgs e)
         {
@@ -153,10 +197,7 @@ namespace KMeansClustering
             if (data == null) return;
 
             DataTable cleanedData = data.Clone();
-            foreach (DataRow row in data.Rows)
-            {
-                cleanedData.ImportRow(row);
-            }
+            foreach (DataRow row in data.Rows) cleanedData.ImportRow(row);
 
             List<string> toDelete = new List<string>();
             foreach (DataColumn column in cleanedData.Columns)
@@ -170,71 +211,82 @@ namespace KMeansClustering
                 if (!isNum) toDelete.Add(column.ColumnName);
             }
 
-            foreach (string item in toDelete)
+            foreach (string item in toDelete) cleanedData.Columns.Remove(item);
+
+            centroids = new Point[C];
+            clusters = new List<Point>[C];
+            for (int i = 0; i < C; i++)
             {
-                cleanedData.Columns.Remove(item);
+                centroids[i] = new Point(new List<double>());
+                clusters[i] = new List<Point>();
             }
 
+            KMeansCluster classifier;
+            double time;
             switch (cbMethod.SelectedIndex)
             {
                 case 0:
-                    KMeansCluster classifier;
+                    KMeansCluster.method = 0;
                     try
                     {
-                        classifier = new KMeansCluster(cleanedData, C);                        
+                        classifier = new KMeansCluster(cleanedData, C);
+                        time = GetExecutionTime(() => classifier.Clusterize());
+                    }
+                    catch (Exception ex)
+                    {
+                        tbOut.Text = ex.Message;
+                        return;
+                    }                    
+
+                    tbOut.Text = $"Метод виконано за {time}ms\r\n";
+                    foreach (string label in numericalColumns)
+                    {
+                        tbOut.Text += label + " ";
+                    }                    
+                    tbOut.Text += "\r\n";
+                    for (int i = 0; i < classifier.centroids.Length; i++)
+                    {
+                        centroids[i].coords = classifier.centroids[i].coords;
+                        clusters[i] = classifier.clusters[i];
+                        foreach (double value in classifier.centroids[i].coords)
+                        {
+                            tbOut.Text += value.ToString("N3") + " | ";
+                        }
+                        tbOut.Text += "\r\n";
+                    }
+
+                    refreshChart();                 
+                    
+                    break;
+                case 1:
+                    KMeansCluster.method = 1;
+                    try
+                    {
+                        classifier = new KMeansCluster(cleanedData, C);
+                        time = GetExecutionTime(() => classifier.Clusterize());
                     }
                     catch (Exception ex)
                     {
                         tbOut.Text = ex.Message;
                         return;
                     }
-                    classifier.Clusterize();
 
-                    tbOut.Text = "";
+                    tbOut.Text = $"Метод виконано за {time}ms\r\n";
                     for (int i = 0; i < classifier.centroids.Length; i++)
                     {
                         centroids[i].coords = classifier.centroids[i].coords;
-                        string res = "";
+                        clusters[i] = classifier.clusters[i];
                         foreach (double value in classifier.centroids[i].coords)
                         {
-                            res += value.ToString("N3") + " | ";
+                            tbOut.Text += value.ToString("N3") + " | ";
                         }
-                        tbOut.Text += res + "\r\n";
-                    }
-
-                    for (int i = 0; i < chart.Series[0].Points.Count; i++)
-                    {
-                        DataPoint point = chart.Series[0].Points[i];
-
-                        int pointClass = 0;
-                        for (int j = 0; j < classifier.clusters.Count; j++)
-                        {
-                            var cluster = classifier.clusters[j];
-
-                            bool isInCluster = false;
-                            for (int n = 0; n < cluster.Count; n++)
-                            {
-                                if (cluster[n].coords[numericalColumns.IndexOf(cbXAxis.Text)] == point.XValue &&
-                                    cluster[n].coords[numericalColumns.IndexOf(cbYAxis.Text)] == point.YValues[0])
-                                {
-                                    isInCluster = true;
-                                    break;
-                                }
-                            }
-                            if (isInCluster)
-                            {
-                                pointClass = j;
-                                break;
-                            }
-                        }
-                        chart.Series[0].Points[i].Color = palette[pointClass];                        
+                        tbOut.Text += "\r\n";
                     }
 
                     refreshChart();
                     break;
-                case 1:
-                    break;
             }
+                        
         }
 
     }

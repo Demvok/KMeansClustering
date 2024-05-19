@@ -50,8 +50,8 @@
             // 
             this.cbMethod.FormattingEnabled = true;
             this.cbMethod.Items.AddRange(new object[] {
-            "1",
-            "2"});
+            "Метод k-середніх",
+            "Метод k-медіан"});
             this.cbMethod.Location = new System.Drawing.Point(12, 149);
             this.cbMethod.Margin = new System.Windows.Forms.Padding(4);
             this.cbMethod.Name = "cbMethod";
@@ -80,7 +80,8 @@
             series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Point;
             series2.Legend = "Legend1";
             series2.MarkerColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
-            series2.MarkerSize = 8;
+            series2.MarkerSize = 9;
+            series2.MarkerStyle = System.Windows.Forms.DataVisualization.Charting.MarkerStyle.Diamond;
             series2.Name = "Centroids";
             this.chart.Series.Add(series1);
             this.chart.Series.Add(series2);

@@ -4,14 +4,20 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace KMeansClustering
 {
     internal class KMeansCluster
-    {        
+    {
+        /// <summary>
+        /// Method 0 - Mean of all points
+        /// Method 1 - Median of all points
+        /// </summary>
+        public static int method = 0;
 
         public Point[] centroids;
-        public List<List<Point>> clusters;
+        public List<Point>[] clusters;
         private List<Point> data;
 
         public KMeansCluster(DataTable _data, int C=2)
@@ -19,7 +25,7 @@ namespace KMeansClustering
             if (_data == null) throw new ArgumentNullException("Data missing");
             centroids = new Point[C];
             data = new List<Point>();
-            clusters = new List<List<Point>>();            
+            clusters = new List<Point>[C];            
 
             foreach (DataRow row in _data.Rows)
             {
@@ -48,10 +54,10 @@ namespace KMeansClustering
             while (!isConverged)
             {
                 // Clear previous clusters
-                clusters = new List<List<Point>>();
+                clusters = new List<Point>[centroids.Length];
                 for (int i = 0; i < centroids.Length; i++)
                 {
-                    clusters.Add(new List<Point>());
+                    clusters[i] = new List<Point>();
                 }
 
                 // Assign each point to the closest centroid
@@ -77,7 +83,7 @@ namespace KMeansClustering
 
                 // Calculate new centroids
                 Point[] new_centroids = new Point[centroids.Length];
-                for (int i = 0; i < clusters.Count; i++)
+                for (int i = 0; i < clusters.Length; i++)
                 {
                     new_centroids[i] = CalculateCentroid(clusters[i]);
                 }
@@ -103,25 +109,52 @@ namespace KMeansClustering
         {
             double[] centroid = new double[centroids[0].coords.Count];
 
-            // Method 1 - Mean of all points
-            foreach (Point point in points)
+            switch (method)
             {
-                for (int i = 0; i < point.coords.Count; i++)
-                {
-                    centroid[i] += point.coords[i];
-                }
-            }
+                case 0:
+                    // Method 1 - Mean of all points
+                    foreach (Point point in points)
+                    {
+                        for (int i = 0; i < point.coords.Count; i++)
+                        {
+                            centroid[i] += point.coords[i];
+                        }
+                    }
 
-            for (int i = 0; i < centroid.Length; i++)
-            {
-                centroid[i] /= points.Count;
-            }
-            //
+                    for (int i = 0; i < centroid.Length; i++)
+                    {
+                        centroid[i] /= points.Count;
+                    }
+                    break;
+                case 1:
+                    // Method 2 - Median of all points
+                    for (int i = 0; i < centroid.Length; i++)
+                    {
+                        double[] values = new double[points.Count];
+                        for (int j = 0; j < points.Count; j++)
+                        {
+                            values[j] = points[j].coords[i];
+                        }
+                        Array.Sort(values);
+                        
+                        if (points.Count % 2 == 0)
+                        {
+                            centroid[i] = (values[points.Count / 2] + values[points.Count / 2 + 1]) / 2;
+                        }
+                        else
+                        {
+                            centroid[i] = values[points.Count / 2 + 1];
+                        }
+                    }
+                    break;
+                default:
+                    throw new Exception("Unknown method exception");
+            }             
 
             return new Point(new List<double>(centroid));            
         }
 
-        bool areListsEqual(List<double> list1, List<double> list2)
+        private bool areListsEqual(List<double> list1, List<double> list2)
         {
             if (list1.Count != list2.Count) return false;
             for (int i = 0; i < list1.Count; i++)
@@ -129,7 +162,6 @@ namespace KMeansClustering
                 if (list1[i] != list2[i]) return false;
             }
             return true;
-        }
-
+        }     
     }
 }

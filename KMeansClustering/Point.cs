@@ -21,13 +21,12 @@ namespace KMeansClustering
 
         public double GetDistance(Point secondPoint)
         {
-            // ?
             double sum = 0;
             for (int i = 0; i < coords.Count; i++)
             {
                 sum += Math.Abs(Math.Pow(secondPoint.coords[i], 2) - Math.Pow(coords[i], 2));
             }
-            return Math.Pow(sum, 1f / coords.Count);
+            return Math.Sqrt(sum);
         }
 
     }
